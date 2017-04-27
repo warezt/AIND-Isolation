@@ -34,8 +34,19 @@ def custom_score(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
-    raise NotImplementedError
+    # Legal moves of my move "Minus" legal moves of opponent move
+    
+    #Check if it is end game
+    if game.is_winner(player):
+        return float("inf")
+    if game.is_loser(player):
+        return float("-inf")
+    #if it is not end game, calculate score
+    number_of_my_moves_left = len(game.get_legal_moves(player)) #Use len to extract list of all legal moves
+    number_of_opponent_moves_left  = len(game.get_legal_moves(game.get_opponent(player))) #Use .get_opponent to return opponent of the supplied player
+    return float(number_of_my_moves_left - number_of_opponent_moves_left)
+
+
 
 
 def custom_score_2(game, player):
@@ -172,6 +183,7 @@ class MinimaxPlayer(IsolationPlayer):
         # Return the best move from the last completed search iteration
         return best_move
 
+
     def minimax(self, game, depth):
         """Implement depth-limited minimax search algorithm as described in
         the lectures.
@@ -213,11 +225,49 @@ class MinimaxPlayer(IsolationPlayer):
         """
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
-
         # TODO: finish this function!
-        raise NotImplementedError
+        def min_play(game,depth):
+            if self.time_left() < self.TIMER_THRESHOLD: #Insert time constraint in each function
+                raise SearchTimeout()
+            if len(game.get_legal_moves())==0 or depth==0:
+                return self.score(game,self)
+            else:
+                legal_moves = game.get_legal_moves()    #Retrieve Legal move
+                bestscore=float("inf")                  #Initialized some initial value to inf
+                for move in legal_moves:                #Find it in every move
+                    score=max_play(game.forecast_move(move), depth-1) #Look it deeper by one level.
+                    if score<bestscore:                 
+                        bestscore=score                 #best score is the lower score
+                return bestscore
+        def max_play(game,depth):
+            if self.time_left() < self.TIMER_THRESHOLD:
+                raise SearchTimeout()
+            if len(game.get_legal_moves())==0 or depth==0:
+                return self.score(game,self)
+            else:
+                legal_moves = game.get_legal_moves()    #Retrieve Legal move
+                bestscore=float("-inf")
+                for move in legal_moves:
+                    score=min_play(game.forecast_move(move), depth-1)
+                    if score>bestscore:
+                        bestscore=score
+                return bestscore
+        legal_moves = game.get_legal_moves()    #Retrieve Legal move
+        bestmove = (-1,-1)                      #Set some initial tuples
+        bestscore=float("-inf")                 #Set some initial value
+        for move in legal_moves:
+            clone=game.forecast_move(move)      #Forecast move given each move
+            score=min_play(clone,depth)             #Get the score of the shallowest depth 
+            if score==float("inf"):             #Check if end game
+                return (-1, -1)
+            elif score==float("-inf"):          #Check if end game
+                return (-1, -1)
+            elif score>bestscore:               #update score for best move
+                bestmove=move
+        return bestmove
 
 
+ 
 class AlphaBetaPlayer(IsolationPlayer):
     """Game-playing agent that chooses a move using iterative deepening minimax
     search with alpha-beta pruning. You must finish and test this player to

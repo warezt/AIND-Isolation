@@ -224,18 +224,16 @@ class MinimaxPlayer(IsolationPlayer):
                 return bestscore
         legal_moves = game.get_legal_moves()    #Retrieve Legal move
         bestmove = (-1,-1)                      #Set some initial tuples
+        if len(game.get_legal_moves())==0:
+            return bestmove
         bestscore=float("-inf")                 #Set some initial value
         for move in legal_moves:
             clone=game.forecast_move(move)      #Forecast move given each move
             score=min_play(clone,depth)             #Get the score of the shallowest depth 
-            if score==float("inf"):             #Check if end game
-                return (-1, -1)
-            elif score==float("-inf"):          #Check if end game
-                return (-1, -1)
-            elif score>bestscore:               #update score for best move
+            if score>=bestscore:               #update score for best move
+                bestscore=score
                 bestmove=move
         return bestmove
-
 
  
 class AlphaBetaPlayer(IsolationPlayer):

@@ -11,8 +11,8 @@ import random
 import timeit
 from copy import copy
 
-TIME_LIMIT_MILLIS = 150
-
+#TIME_LIMIT_MILLIS = 150
+TIME_LIMIT_MILLIS = 1500000000000000000000000000000
 
 class Board(object):
     """Implement a model for the game Isolation assuming each player moves like
@@ -315,14 +315,24 @@ class Board(object):
         move_history = []
 
         time_millis = lambda: 1000 * timeit.default_timer()
-
+        dummyA=time_millis()
+        dummyA2=time_millis()
         while True:
-
+            print("\nNew state:\n{}".format(self.to_string()))
             legal_player_moves = self.get_legal_moves()
             game_copy = self.copy()
-
             move_start = time_millis()
+            dummyB=time_millis()
+            dummyB2=time_millis()
             time_left = lambda : time_limit - (time_millis() - move_start)
+            dummyC=time_limit
+            dummyD=time_millis()
+            dummyE=time_left()
+            dummyF=move_start
+            dummyC2=time_limit
+            dummyD2=time_millis()
+            dummyE2=time_left()
+            dummyF2=move_start
             curr_move = self._active_player.get_move(game_copy, time_left)
             move_end = time_left()
 

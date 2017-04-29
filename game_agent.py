@@ -229,7 +229,7 @@ class MinimaxPlayer(IsolationPlayer):
         bestscore=float("-inf")                 #Set some initial value
         for move in legal_moves:
             clone=game.forecast_move(move)      #Forecast move given each move
-            score=min_play(clone,depth)             #Get the score of the shallowest depth 
+            score=min_play(clone,depth-1)             #Get the score of the shallowest depth 
             if score>=bestscore:               #update score for best move
                 bestscore=score
                 bestmove=move
@@ -270,7 +270,21 @@ class AlphaBetaPlayer(IsolationPlayer):
         self.time_left = time_left
 
         # TODO: finish this function!
-        raise NotImplementedError
+
+        # Initialize the best move so that this function returns something
+        # in case the search fails due to timeout
+        best_move = (-1, -1)
+
+        try:
+            # The try/except block will automatically catch the exception
+            # raised when the timer is about to expire.
+            return self.alphabeta(game,self.search_depth)
+
+        except SearchTimeout:
+            pass  # Handle any actions required after timeout as needed
+
+        # Return the best move from the last completed search iteration
+        return best_move
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf")):
         """Implement depth-limited minimax search with alpha-beta pruning as
@@ -310,6 +324,56 @@ class AlphaBetaPlayer(IsolationPlayer):
         """
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
-
         # TODO: finish this function!
-        raise NotImplementedError
+
+        def max_play(game,depth,alpha,beta):
+            if self.time_left() < self.TIMER_THRESHOLD:
+                raise SearchTimeout()
+            if len(game.get_legal_moves())==0 or depth==0:
+                return self.score(game,self)
+            else:
+                legal_moves = game.get_legal_moves()    #Retrieve Legal move
+                bestscore=float("-inf")
+                for move in legal_moves:
+                    score=min_play(game.forecast_move(move),depth-1,alpha,beta)
+                    bestscore=max(bestscore,score)
+                    if bestscore>=beta:
+                        return bestscore
+                    alpha=max(alpha,bestscore)  #4. At max player, this alpha will be local max branch alpha. 
+                    #It will not update upwards to the shallower depth. 
+                    #Instead, this alpha value will be used for min player BELOW them in manner that if those min player could achieve their bestscore below this local alpha, 
+                    #those resulting bestscore from min player below this local max branch will never be selected because
+                    # those score min value will be lower than alpha (best score for max player at EITHER local or top level) and thus, the max player(Either this local max player or top level max player) will never choose it.
+                return bestscore
+        def min_play(game,depth,alpha,beta):
+            if self.time_left() < self.TIMER_THRESHOLD: #Insert time constraint in each function
+                raise SearchTimeout()
+            if len(game.get_legal_moves())==0 or depth==0:
+                return self.score(game,self)
+            else:
+                legal_moves = game.get_legal_moves()    #Retrieve Legal move
+                bestscore=float("inf")                  #Initialized some initial value to inf
+                for move in legal_moves:                #Find it in every move
+                    score=max_play(game.forecast_move(move),depth-1,alpha,beta) #Look it deeper by one level.
+                    bestscore=min(bestscore,score)
+                    if bestscore<=alpha:            #2. At min player, if best score is less than alpha (which came from above max player), it means max player(which is above) will never choose this branch. So, prune out!!!
+                        return bestscore
+                    beta=min(beta,bestscore)        #3. At min player, beta value will  kept update and will be used for max player at its lower branch. 
+                    #It will be used in case if max branch below it can get value equal or exceed beta, 
+                    #those max branch will get value higher than beta (or best lowest score for min player). 
+                    #Therefore, we can pruned out those max player beneath it.
+                return bestscore
+        legal_moves = game.get_legal_moves()    #Retrieve Legal move
+        bestmove = (-1,-1)                      #Set some initial tuples
+        if len(game.get_legal_moves())==0:
+            return bestmove
+        bestscore=float("-inf")                 #Set some initial value
+        beta=float("inf")
+        for move in legal_moves:
+            clone=game.forecast_move(move)      #Forecast move given each move
+            score=min_play(clone,depth-1,bestscore,beta)             #1.The best score will be plugged in as alpha(Permanent, increase only) from left most branch
+            #Notably, depth is count as starting at 3, the going deep in will be 2 then 1 then 0.
+            if score>=bestscore:               #update score for best move
+                bestscore=score
+                bestmove=move
+        return bestmove

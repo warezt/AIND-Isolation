@@ -42,9 +42,6 @@ def custom_score(game, player):
     number_of_opponent_moves_left  = len(game.get_legal_moves(game.get_opponent(player))) #Use .get_opponent to return opponent of the supplied player
     return float(number_of_my_moves_left - number_of_opponent_moves_left)
 
-
-
-
 def custom_score_2(game, player):
     """Calculate the heuristic value of a game state from the point of view
     of the given player.
@@ -64,7 +61,31 @@ def custom_score_2(game, player):
         The heuristic value of the current game state to the specified player.
     """
     # TODO: finish this function!
-    raise NotImplementedError
+    #Check if it is end game
+    if game.is_winner(player):
+        return float("inf")
+    if game.is_loser(player):
+        return float("-inf")
+    #Number of my move - number of opponentmove in 2 stages
+    player_move_1st_order=game.get_legal_moves(player)
+    opponent_move_1st_order=game.get_legal_moves(game.get_opponent(player))
+    player_move_2nd_order=[]
+    opponent_move_2nd_order=[]
+    #Find 2nd order location
+    for each_1st_order in player_move_1st_order:
+        r, c = each_1st_order
+        directions = [(-2, -1), (-2, 1), (-1, -2), (-1, 2), (1, -2), (1, 2), (2, -1), (2, 1)]
+        valid_moves = [(r + dr, c + dc) for dr, dc in directions if game.move_is_legal((r + dr, c + dc))]
+        player_move_2nd_order.extend(valid_moves)
+    player_move_2nd_order=list(set(player_move_2nd_order))    #Remove Duplicates
+    for each_1st_order in opponent_move_1st_order:
+        r, c = each_1st_order
+        directions = [(-2, -1), (-2, 1), (-1, -2), (-1, 2), (1, -2), (1, 2), (2, -1), (2, 1)]
+        valid_moves = [(r + dr, c + dc) for dr, dc in directions if game.move_is_legal((r + dr, c + dc))]
+        opponent_move_2nd_order.extend(valid_moves)
+    opponent_move_2nd_order=list(set(opponent_move_2nd_order))    #Remove Duplicates
+    #We view that 1st order is twice as important as 2nd order moves
+    return float(len(player_move_2nd_order)+len(player_move_1st_order)*2 - len(opponent_move_2nd_order)-len(opponent_move_1st_order)*2)
 
 
 def custom_score_3(game, player):
@@ -86,7 +107,70 @@ def custom_score_3(game, player):
         The heuristic value of the current game state to the specified player.
     """
     # TODO: finish this function!
-    raise NotImplementedError
+    #Given any start location, for 7x7 squares, I trialed and found that all independent(Non recycling) move can occupied in squares within 7 stages.
+    #7 depth is found by initiating random start position in 7x7 squares and get legal move and occupied all those legal move until 7x7 is full.
+    #
+    #Overall is Number of my move - number of opponentmove in 7 stages. But note that
+    #Same moves will be cancelled out (high depth level will cause redundancy in available position)
+    #If same player got two identical move but in difference level, take higher depth score
+    #Score is set at multiplication of two; 64=>32=>16=>8=>4=>2=>1
+    #Move at lower order will be deducted by move at enemy's higher order
+    #Suppose move in 1st order is [(1,1) (2,2)], move in 2nd order looking will be [(x,x) (y,y)]
+    #score calculation will be 1st order score + 2nd order score+ ....
+    #Player move 1st order ; p1, Opponent move 2nd order; o2
+    p1=game.get_legal_moves(player)
+    o1=game.get_legal_moves(game.get_opponent(player))
+    def getdeepermove(list_of_moves):
+        list_of_next_moves=[]
+        for each_move in list_of_moves:
+            r, c = each_move
+            directions = [(-2, -1), (-2, 1), (-1, -2), (-1, 2), (1, -2), (1, 2), (2, -1), (2, 1)]
+            valid_moves = [(r + dr, c + dc) for dr, dc in directions if game.move_is_legal((r + dr, c + dc))]
+            list_of_next_moves.extend(valid_moves)
+        list_of_next_moves=list(set(list_of_next_moves))    #Remove Duplicates
+        return list_of_next_moves
+    #Get previous level order moves; Union
+    po1=list(set(o1)|set(p1))
+    #Get second order move
+    p2=[x for x in getdeepermove(p1) if x not in po1]
+    o2=[x for x in getdeepermove(o1) if x not in po1]
+
+    #Get all previous level order moves; Union
+    po2=list(set(po1)|set(o2)|set(p2))
+    #Get third order move
+    p3=[x for x in getdeepermove(p2) if x not in po2]
+    o3=[x for x in getdeepermove(o2) if x not in po2]
+
+    #Get all previous level order moves; Union
+    po3=list(set(po2)|set(o3)|set(p3))
+    #Get fourth order move
+    p4=[x for x in getdeepermove(p3) if x not in po3]
+    o4=[x for x in getdeepermove(o3) if x not in po3]
+
+    #Get all previous level order moves; Union
+    po4=list(set(po3)|set(o4)|set(p4))
+    #Get fifth order move
+    p5=[x for x in getdeepermove(p4) if x not in po4]
+    o5=[x for x in getdeepermove(o4) if x not in po4]
+    
+    #Get all previous level order moves; Union
+    po5=list(set(po4)|set(o5)|set(p5))
+    #Get sixth order move
+    p6=[x for x in getdeepermove(p5) if x not in po5]
+    o6=[x for x in getdeepermove(o5) if x not in po5]
+       
+    #Get all previous level order moves; Union
+    po6=list(set(po5)|set(o6)|set(p6))
+    #Get seventh order move
+    p7=[x for x in getdeepermove(p6) if x not in po6]
+    o7=[x for x in getdeepermove(o6) if x not in po6]
+       
+    #Get all previous level order moves; Union
+    po7=list(set(po6)|set(o7)|set(p7))
+
+
+    return float((len(p1)-len(o1))*64 + (len(p2)-len(o2))*32 + (len(p3)-len(o3))*16 + (len(p4)-len(o4))*8 + (len(p5)-len(o5))*4 + (len(p6)-len(o6))*2 + (len(p7)-len(o7))*1)
+
 
 
 class IsolationPlayer:

@@ -11,8 +11,8 @@ import random
 import timeit
 from copy import copy
 
-#TIME_LIMIT_MILLIS = 2000
-TIME_LIMIT_MILLIS = 1500000000000000000000000000000
+TIME_LIMIT_MILLIS = 2000
+#TIME_LIMIT_MILLIS = 1500000000000000000000000000000
 
 class Board(object):
     """Implement a model for the game Isolation assuming each player moves like

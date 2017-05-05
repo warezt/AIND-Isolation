@@ -359,13 +359,18 @@ class AlphaBetaPlayer(IsolationPlayer):
         # in case the search fails due to timeout
         best_move = (-1, -1)
         try:
-            depth=0
+            depth=1
             while True:
                 best_move=self.alphabeta(game,depth)
                 if best_move == (-1, -1):
+                    print(depth)
+                    return best_move
+                elif self.time_left()-1 < self.TIMER_THRESHOLD:
+                    print(depth)
                     return best_move
                 depth+=1
         except SearchTimeout:
+            print(depth)
             return best_move  # Handle any actions required after timeout as needed
 
 

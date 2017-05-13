@@ -319,7 +319,7 @@ class Board(object):
         #dummyA=time_millis()
         #dummyA2=time_millis()
         while True:
-            print("\nNew state:\n{}".format(self.to_string()))
+            #print("\nNew state:\n{}".format(self.to_string()))
             legal_player_moves = self.get_legal_moves()
             game_copy = self.copy()
             move_start = time_millis()

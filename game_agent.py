@@ -314,7 +314,7 @@ class MinimaxPlayer(IsolationPlayer):
         for move in legal_moves:
             clone=game.forecast_move(move)      #Forecast move given each move
             score=min_play(clone,depth-1)             #Get the score of the shallowest depth 
-            if score>=bestscore:               #update score for best move
+            if score>bestscore:               #update score for best move
                 bestscore=score
                 bestmove=move
         return bestmove
@@ -363,14 +363,14 @@ class AlphaBetaPlayer(IsolationPlayer):
             while True:
                 best_move=self.alphabeta(game,depth)
                 if best_move == (-1, -1):
-                    print(depth)
+                    #print(depth)
                     return best_move
                 elif self.time_left()-1 < self.TIMER_THRESHOLD:
-                    print(depth)
+                    #print(depth)
                     return best_move
                 depth+=1
         except SearchTimeout:
-            print(depth)
+            #print(depth)
             return best_move  # Handle any actions required after timeout as needed
 
 
@@ -454,7 +454,7 @@ class AlphaBetaPlayer(IsolationPlayer):
         for move in legal_moves:
             clone=game.forecast_move(move)      #Forecast move given each move
             score=min_play(clone,depth-1,bestscore,beta)             #1.The best score will be plugged in as alpha(Permanent, increase only) from left most branch Notably, depth is count as starting at 3, the going deep in will be 2 then 1 then 0.
-            if score>=bestscore:               #update score for best move
+            if score>bestscore:               #update score for best move
                 bestscore=score
                 bestmove=move
         return bestmove

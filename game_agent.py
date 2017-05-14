@@ -87,7 +87,6 @@ def custom_score_2(game, player):
     #We view that 1st order is twice as important as 2nd order moves
     return float(len(player_move_2nd_order)+len(player_move_1st_order)*2 - len(opponent_move_2nd_order)-len(opponent_move_1st_order)*2)
 
-
 def custom_score_3(game, player):
     """Calculate the heuristic value of a game state from the point of view
     of the given player.
@@ -280,6 +279,12 @@ class MinimaxPlayer(IsolationPlayer):
             raise SearchTimeout()
 
         # TODO: finish this function!
+        legal_moves = game.get_legal_moves()    #Retrieve Legal move
+        bestmove = (-1,-1)                      #Set some initial tuples
+        if len(game.get_legal_moves())==0:
+            return bestmove
+
+        #Define function after determine if the game has legal move left to speed up algorithm
         def min_play(game,depth):
             if self.time_left() < self.TIMER_THRESHOLD: #Insert time constraint in each function
                 raise SearchTimeout()
@@ -306,11 +311,9 @@ class MinimaxPlayer(IsolationPlayer):
                     if score>bestscore:
                         bestscore=score
                 return bestscore
-        legal_moves = game.get_legal_moves()    #Retrieve Legal move
-        bestmove = (-1,-1)                      #Set some initial tuples
-        if len(game.get_legal_moves())==0:
-            return bestmove
+
         bestscore=float("-inf")                 #Set some initial value
+        bestmove = legal_moves[0]                 #Initialized bestmove
         for move in legal_moves:
             clone=game.forecast_move(move)      #Forecast move given each move
             score=min_play(clone,depth-1)             #Get the score of the shallowest depth 
@@ -365,7 +368,7 @@ class AlphaBetaPlayer(IsolationPlayer):
                 if best_move == (-1, -1):
                     #print(depth)
                     return best_move
-                elif self.time_left()-1 < self.TIMER_THRESHOLD:
+                elif self.time_left()-1 <= self.TIMER_THRESHOLD:
                     #print(depth)
                     return best_move
                 depth+=1
@@ -414,11 +417,17 @@ class AlphaBetaPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
         # TODO: finish this function!
+        legal_moves = game.get_legal_moves()    #Retrieve Legal move
+        bestmove = (-1,-1)                      #Set some initial tuples
+        if len(game.get_legal_moves())==0:
+            return bestmove
 
+        #Define function after determine if the game has legal move left to speed up algorithm
         def max_play(game,depth,alpha,beta):
             if self.time_left() < self.TIMER_THRESHOLD:
                 raise SearchTimeout()
-            if len(game.get_legal_moves())==0 or depth==0:
+            #if len(game.get_legal_moves())==0 or depth==0: #Initial One
+            if not game.get_legal_moves() or depth==0:    #Alternative Choices
                 return self.score(game,self)
             else:
                 legal_moves = game.get_legal_moves()    #Retrieve Legal move
@@ -433,7 +442,7 @@ class AlphaBetaPlayer(IsolationPlayer):
         def min_play(game,depth,alpha,beta):
             if self.time_left() < self.TIMER_THRESHOLD: #Insert time constraint in each function
                 raise SearchTimeout()
-            if len(game.get_legal_moves())==0 or depth==0:
+            if not game.get_legal_moves() or depth==0:    #Alternative Choices
                 return self.score(game,self)
             else:
                 legal_moves = game.get_legal_moves()    #Retrieve Legal move
@@ -445,16 +454,14 @@ class AlphaBetaPlayer(IsolationPlayer):
                         return bestscore
                     beta=min(beta,bestscore)        #3. At min player, beta value will  kept update and will be used for max player at its lower branch. It will be used in case if max branch below it can get value equal or exceed beta, those max branch will get value higher than beta (or best lowest score for min player). Therefore, we can pruned out those max player beneath it.
                 return bestscore
-        legal_moves = game.get_legal_moves()    #Retrieve Legal move
-        bestmove = (-1,-1)                      #Set some initial tuples
-        if len(game.get_legal_moves())==0:
-            return bestmove
+
         bestscore=float("-inf")                 #Set some initial value
         beta=float("inf")
+        bestmove = legal_moves[0]                 #Initialized bestmove
         for move in legal_moves:
             clone=game.forecast_move(move)      #Forecast move given each move
             score=min_play(clone,depth-1,bestscore,beta)             #1.The best score will be plugged in as alpha(Permanent, increase only) from left most branch Notably, depth is count as starting at 3, the going deep in will be 2 then 1 then 0.
-            if score>bestscore:               #update score for best move
+            if score>=bestscore:               #update score for best move
                 bestscore=score
                 bestmove=move
         return bestmove

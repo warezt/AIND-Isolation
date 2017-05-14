@@ -282,7 +282,8 @@ if __name__ == "__main__":
     print("\nOld state:\n{}".format(game.to_string()))
     print("\nNew state:\n{}".format(new_game.to_string()))
 
-    # play the remainder of the game automatically -- outcome can be "illegal
+    # play the remainder of the game automatically -- outco
+    # me can be "illegal
     # move", "timeout", or "forfeit"
     winner, history, outcome = game.play()
     print("\nWinner: {}\nOutcome: {}".format(winner, outcome))

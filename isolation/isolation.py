@@ -11,9 +11,9 @@ import random
 import timeit
 from copy import copy
 
-#TIME_LIMIT_MILLIS = 2000
+#TIME_LIMIT_MILLIS = 150 #Initial
 TIME_LIMIT_MILLIS = 1000
-#TIME_LIMIT_MILLIS = 1500000000000000000000000000000
+#TIME_LIMIT_MILLIS = 1500000000000000000000000000000 #For Debugging
 
 class Board(object):
     """Implement a model for the game Isolation assuming each player moves like
